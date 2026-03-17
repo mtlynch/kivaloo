@@ -45,10 +45,19 @@ callback_params(void * cookie, int failed, size_t blklen, uint64_t blkno,
 {
 	struct params_cookie * C = cookie;
 
+	/* Validate the block size. */
+	if (!failed &&
+	    (blklen < PROTO_LBS_BLKLEN_MIN || blklen > PROTO_LBS_BLKLEN_MAX)) {
+		warn0("LBS returned invalid block size: %zu", blklen);
+		failed = 1;
+	}
+
 	/* Record returned values. */
-	C->T->pagelen = blklen;
-	C->T->nextblk = blkno;
-	C->lastblk = lastblk;
+	if (!failed) {
+		C->T->pagelen = blklen;
+		C->T->nextblk = blkno;
+		C->lastblk = lastblk;
+	}
 
 	/* We're done. */
 	C->failed = failed;
